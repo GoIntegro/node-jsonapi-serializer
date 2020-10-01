@@ -247,32 +247,22 @@ export const JSONAPIDeserializer = {
   },
 };
 
-export default class JSONApiSerializer {
-  public serializerConfig: (data?: any) => SerializerConfig;
+export class JSONApiSerializer {
+  public serializerConfig: (data?: any) => any;
 
-  private isCompoundValue(value: any) {
-    return isCompoundValue(isCompoundValue);
+  private isCompoundValue(value) {
+    return isObject(value) && !isEmpty(without(keys(value), "id", "type"));
   }
 
-  private addToIncluded(
-    includedEntities: JSONApiResource[],
-    entity: JSONApiResource
-  ): number {
+  private addToIncluded(includedEntities, entity) {
     return includedEntities.push(entity);
   }
 
-  private addToSerializedEntities(
-    serializedEntities: JSONApiResource[],
-    entity: JSONApiResource
-  ): number {
+  private addToSerializedEntities(serializedEntities, entity) {
     return serializedEntities.push(entity);
   }
 
-  private getSerializedEntity(
-    serializedEntities: JSONApiResource[],
-    entityId: string,
-    entityType: string
-  ): JSONApiResource | undefined {
+  private getSerializedEntity(serializedEntities, entityId, entityType) {
     return find(serializedEntities, (serializedEntity) => {
       return (
         serializedEntity.id === entityId.toString() &&
@@ -281,11 +271,7 @@ export default class JSONApiSerializer {
     });
   }
 
-  private isEntityIncluded(
-    includedEntities: JSONApiResource[],
-    entityId: string,
-    entityType: string
-  ): boolean {
+  private isEntityIncluded(includedEntities, entityId, entityType) {
     return Boolean(
       find(includedEntities, (included) => {
         return (
@@ -295,20 +281,13 @@ export default class JSONApiSerializer {
     );
   }
 
-  private isEntitySerialized(
-    serializedEntities: JSONApiResource[],
-    entityId: string,
-    entityType: string
-  ): boolean {
+  private isEntitySerialized(serializedEntities, entityId, entityType) {
     return Boolean(
       this.getSerializedEntity(serializedEntities, entityId, entityType)
     );
   }
 
-  private removeWhitelistKey(
-    key: string,
-    includeWhitelistKeys: string[]
-  ): string[] {
+  private removeWhitelistKey(key, includeWhitelistKeys) {
     const output = reduce(
       includeWhitelistKeys,
       (acum, whitelistedKey) => {
@@ -333,7 +312,7 @@ export default class JSONApiSerializer {
   private isKeyWhitelistedIncluded(
     key: string,
     includeWhitelistKeys: string[]
-  ): boolean {
+  ) {
     return Boolean(
       includeWhitelistKeys.find((whitelistedKey) => {
         return whitelistedKey?.split(".")?.[0] === key;
@@ -342,13 +321,13 @@ export default class JSONApiSerializer {
   }
 
   private serializeEntity(
-    data: any,
-    config: SerializerConfig,
-    includedEntities: JSONApiResource[],
-    serializedEntities: JSONApiResource[],
-    lang: string,
-    includeWhitelistKeys: string[] = []
-  ): JSONApiResource {
+    data,
+    config,
+    includedEntities,
+    serializedEntities,
+    lang,
+    includeWhitelistKeys = []
+  ) {
     const entityId = get(data, "id") || data;
     const entityType = get(data, "type") || config.type;
 
@@ -462,7 +441,6 @@ export default class JSONApiSerializer {
         }
       }
     });
-
     if (config.meta) {
       output.meta = config.meta(data);
     }
@@ -470,7 +448,7 @@ export default class JSONApiSerializer {
     return output;
   }
 
-  private serializeRelationships(data: any, config: SerializerConfig) {
+  private serializeRelationships(data, config) {
     return reduce(
       data,
       (acum, value, key) => {

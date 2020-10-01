@@ -1,4 +1,4 @@
-import { JSONAPIDeserializer } from "../src";
+import { JSONAPIDeserializer, JSONApiSerializer } from "../src";
 
 test("JSONAPIDeserializer:basic attributes", async () => {
   const jsonapiResponse = {
@@ -303,4 +303,102 @@ test("JSONAPIDeserializer:nested included circular relationships", async () => {
   const { data } = output;
   expect(data.films[0].characters[0].films[0].characters[0]).toEqual(data);
   expect(data.starships[0].pilots[1].films[0].characters[0]).toEqual(data);
+});
+
+class StarchipSerializer extends JSONApiSerializer {
+  public serializerConfig = () => {
+    return {
+      type: "starships",
+      attributes: ["name", "model"],
+      relationships: {
+        pilots: () => new PeopleSerializer().serializerConfig(),
+      },
+    };
+  };
+}
+
+class FilmSerializer extends JSONApiSerializer {
+  public serializerConfig = () => {
+    return {
+      type: "films",
+      attributes: ["title", "director", "producer"],
+      relationships: {
+        characters: () => {
+          console.log(
+            "execute characters serializerConfig",
+            new PeopleSerializer().serializerConfig()
+          );
+          return new PeopleSerializer().serializerConfig();
+        },
+      },
+    };
+  };
+}
+
+class PeopleSerializer extends JSONApiSerializer {
+  public serializerConfig = () => {
+    return {
+      type: "people",
+      attributes: ["name", "height", "mass"],
+      relationships: {
+        films: () => new FilmSerializer().serializerConfig(),
+        starships: () => new StarchipSerializer().serializerConfig(),
+      },
+    };
+  };
+}
+
+test("JSONAPISerializer: basic attributes", async () => {
+  const filmData = [
+    {
+      id: "1",
+      title: "A New Hope",
+      director: "George Lucas",
+      producer: "Gary Kurtz, Rick McCallum",
+      characters: [
+        {
+          id: "1",
+          type: "people",
+          name: "Luke Skywalker",
+          height: "172",
+          mass: "77",
+          films: [
+            {
+              id: "2",
+              title: "The Empire Strikes Back",
+              director: "Irvin Kershner",
+              producer: "Gary Kurtz, Rick McCallum",
+              characters: ["1", "2"],
+            },
+          ],
+          starships: [
+            {
+              id: "12",
+              name: "X-wing",
+              model: "T-65 X-wing",
+              pilots: [
+                "1",
+                {
+                  id: "9",
+                  name: "Biggs Darklighter",
+                  height: "183",
+                  mass: "84",
+                  films: ["1"],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  ];
+
+  const filmSerializer = new FilmSerializer();
+  const output = filmSerializer.serialize(
+    filmData,
+    {},
+    "es",
+    "characters.starships.pilots.films.characters.pilots.films"
+  );
+  console.log(output);
 });
