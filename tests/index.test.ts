@@ -324,10 +324,6 @@ class FilmSerializer extends JSONApiSerializer {
       attributes: ["title", "director", "producer"],
       relationships: {
         characters: () => {
-          console.log(
-            "execute characters serializerConfig",
-            new PeopleSerializer().serializerConfig()
-          );
           return new PeopleSerializer().serializerConfig();
         },
       },
@@ -394,11 +390,10 @@ test("JSONAPISerializer: basic attributes", async () => {
   ];
 
   const filmSerializer = new FilmSerializer();
-  const output = filmSerializer.serialize(
-    filmData,
-    {},
-    "es",
-    "characters.starships.pilots.films.characters.pilots.films"
-  );
+  const output = filmSerializer.serialize({
+    data: filmData,
+    includeWhitelistKeys:
+      "characters.starships.pilots.films.characters.pilots.films",
+  });
   console.log(output);
 });

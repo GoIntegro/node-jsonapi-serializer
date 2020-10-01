@@ -19,59 +19,17 @@ import {
   isNull,
 } from "lodash";
 
-export type JSONApiIdentity = {
-  id: string;
-  type: string;
-};
-
-export type JSONApiSingleRelationshipValues =
-  | JSONApiIdentity
-  | JSONApiResource
-  | null;
-export type JSONApiMultipleRelationshipValues =
-  | JSONApiIdentity[]
-  | JSONApiResource[]
-  | [];
-
-export type JSONApiRelationshipValues =
-  | JSONApiSingleRelationshipValues
-  | JSONApiMultipleRelationshipValues;
-
-export type JSONApiRelationships = {
-  [key: string]: {
-    data: JSONApiRelationshipValues;
-  };
-};
-
-export type JSONApiResource = JSONApiIdentity & {
-  attributes?: {
-    [key: string]: string | number | boolean | null;
-  };
-  relationships?: JSONApiRelationships;
-};
-
-export type JSONApiData = JSONApiResource | JSONApiResource[] | null | [];
-
-export type JSONApiIncluded = JSONApiResource[];
-
-export type JSONApiResponse = {
-  data: JSONApiData;
-  included?: JSONApiIncluded;
-  meta?: any;
-};
-
-export type RelationshipsConfig = {
-  [key: string]: (data?: any) => SerializerConfig;
-};
-
-export type SerializerConfig = {
-  type: string;
-  attributes: string[];
-  i18nAttributes?: any;
-  i18nDefaultKey?: string;
-  relationships?: RelationshipsConfig;
-  meta?: (meta: any) => any;
-};
+import {
+  JSONApiIdentity,
+  JSONApiSingleRelationshipValues,
+  JSONApiRelationshipValues,
+  JSONApiResource,
+  JSONApiData,
+  JSONApiIncluded,
+  JSONApiResponse,
+  SerializerConfig,
+  SerializeRequest,
+} from "./types";
 
 export const isCompoundValue = function (value: any): boolean {
   return isObject(value) && !isEmpty(without(keys(value), "id", "type"));
@@ -508,7 +466,7 @@ export class JSONApiSerializer {
     );
   }
 
-  private _serialize(data, config, meta?, lang?, includeWhitelistKeys?) {
+  private _serialize({ data, config, meta, lang, includeWhitelistKeys }) {
     const output: any = {};
     let entities;
     const includedEntities = [];
@@ -551,13 +509,14 @@ export class JSONApiSerializer {
     return output;
   }
 
-  public serialize(data, meta?, lang?, includeWhitelistKeys?) {
-    return this._serialize(
+  public serialize(request: SerializeRequest) {
+    const { data, meta, lang, includeWhitelistKeys } = request;
+    return this._serialize({
       data,
-      this.serializerConfig(data),
+      config: this.serializerConfig(data),
       meta,
       lang,
-      includeWhitelistKeys
-    );
+      includeWhitelistKeys,
+    });
   }
 }
