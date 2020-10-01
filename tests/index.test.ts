@@ -305,46 +305,45 @@ test("JSONAPIDeserializer:nested included circular relationships", async () => {
   expect(data.starships[0].pilots[1].films[0].characters[0]).toEqual(data);
 });
 
-class StarchipSerializer extends JSONApiSerializer {
-  public serializerConfig = () => {
-    return {
-      type: "starships",
-      attributes: ["name", "model"],
-      relationships: {
-        pilots: () => new PeopleSerializer().serializerConfig(),
-      },
-    };
-  };
-}
-
-class FilmSerializer extends JSONApiSerializer {
-  public serializerConfig = () => {
-    return {
-      type: "films",
-      attributes: ["title", "director", "producer"],
-      relationships: {
-        characters: () => {
-          return new PeopleSerializer().serializerConfig();
-        },
-      },
-    };
-  };
-}
-
-class PeopleSerializer extends JSONApiSerializer {
-  public serializerConfig = () => {
-    return {
-      type: "people",
-      attributes: ["name", "height", "mass"],
-      relationships: {
-        films: () => new FilmSerializer().serializerConfig(),
-        starships: () => new StarchipSerializer().serializerConfig(),
-      },
-    };
-  };
-}
-
 test("JSONAPISerializer: basic attributes", async () => {
+  class StarchipSerializer extends JSONApiSerializer {
+    public serializerConfig = () => {
+      return {
+        type: "starships",
+        attributes: ["name", "model"],
+        relationships: {
+          pilots: () => new PeopleSerializer().serializerConfig(),
+        },
+      };
+    };
+  }
+
+  class FilmSerializer extends JSONApiSerializer {
+    public serializerConfig = () => {
+      return {
+        type: "films",
+        attributes: ["title", "director", "producer"],
+        relationships: {
+          characters: () => {
+            return new PeopleSerializer().serializerConfig();
+          },
+        },
+      };
+    };
+  }
+  class PeopleSerializer extends JSONApiSerializer {
+    public serializerConfig = () => {
+      return {
+        type: "people",
+        attributes: ["name", "height", "mass"],
+        relationships: {
+          films: () => new FilmSerializer().serializerConfig(),
+          starships: () => new StarchipSerializer().serializerConfig(),
+        },
+      };
+    };
+  }
+
   const filmData = [
     {
       id: "1",
@@ -395,5 +394,87 @@ test("JSONAPISerializer: basic attributes", async () => {
     includeWhitelistKeys:
       "characters.starships.pilots.films.characters.pilots.films",
   });
-  console.log(output);
+});
+
+test("JSONAPISerializer: polymorphic relationships", async () => {
+  class UserSerializer extends JSONApiSerializer {
+    public serializerConfig = () => {
+      return {
+        type: "users",
+        attributes: ["name", "last"],
+      };
+    };
+  }
+
+  class BookSerializer extends JSONApiSerializer {
+    public serializerConfig = () => {
+      return {
+        type: "books",
+        attributes: ["title", "totalPages"],
+        relationships: {
+          author: () => new UserSerializer().serializerConfig(),
+        },
+      };
+    };
+  }
+
+  class MovieSerializer extends JSONApiSerializer {
+    public serializerConfig = () => {
+      return {
+        type: "movies",
+        attributes: ["name", "duration"],
+        relationships: {
+          director: () => new UserSerializer().serializerConfig(),
+        },
+      };
+    };
+  }
+
+  class ListItemSerializer extends JSONApiSerializer {
+    public serializerConfig = () => {
+      return {
+        type: "list-items",
+        attributes: [],
+        relationships: {
+          items: (item) => {
+            const { type } = item;
+
+            switch (type) {
+              case "movies":
+                return new MovieSerializer().serializerConfig();
+              case "books":
+                return new BookSerializer().serializerConfig();
+            }
+          },
+        },
+      };
+    };
+  }
+
+  const inputData = {
+    id: "1",
+    items: [
+      {
+        id: "1",
+        type: "books",
+        title: "title book number 1",
+        totalPages: 250,
+        author: "1",
+      },
+      {
+        id: "1",
+        type: "movies",
+        title: "title movie number 1",
+        duration: 120,
+        director: "1",
+      },
+    ],
+  };
+
+  const listItemSerializer = new ListItemSerializer();
+  const output = listItemSerializer.serialize({ data: inputData });
+  const { data } = output;
+
+  expect(data.relationships.items.data[0]).toEqual({ id: "1", type: "books" });
+  expect(data.relationships.items.data[1]).toEqual({ id: "1", type: "movies" });
 });
