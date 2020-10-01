@@ -31,13 +31,9 @@ import {
   SerializeRequest,
 } from "./types";
 
-export const isCompoundValue = function (value: any): boolean {
-  return isObject(value) && !isEmpty(without(keys(value), "id", "type"));
-};
-
 export const JSONAPIDeserializer = {
-  isCompoundValue(value: any) {
-    return isCompoundValue(isCompoundValue);
+  isCompoundValue(value: any): boolean {
+    return isObject(value) && !isEmpty(without(keys(value), "id", "type"));
   },
 
   setResolvedItem<T>(
@@ -209,7 +205,7 @@ export class JSONApiSerializer {
   public serializerConfig: (data?: any) => SerializerConfig;
 
   private isCompoundValue(value: any): boolean {
-    return isCompoundValue(value);
+    return isObject(value) && !isEmpty(without(keys(value), "id", "type"));
   }
 
   private addToIncluded(

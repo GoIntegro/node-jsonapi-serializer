@@ -396,61 +396,85 @@ test("JSONAPISerializer: basic attributes", async () => {
   });
 });
 
+class FileSerializer extends JSONApiSerializer {
+  public serializerConfig = () => {
+    return {
+      type: "files",
+      attributes: ["url"],
+    };
+  };
+}
+
+class ProfileSerializer extends JSONApiSerializer {
+  public serializerConfig = () => {
+    return {
+      type: "profiles",
+      attributes: ["gender", "phone"],
+      relationships: {
+        avatar: () => new FileSerializer().serializerConfig(),
+      },
+    };
+  };
+}
+
+class UserSerializer extends JSONApiSerializer {
+  public serializerConfig = () => {
+    return {
+      type: "users",
+      attributes: ["name", "last"],
+      relationships: {
+        profile: () => new ProfileSerializer().serializerConfig(),
+      },
+    };
+  };
+}
+
+class BookSerializer extends JSONApiSerializer {
+  public serializerConfig = () => {
+    return {
+      type: "books",
+      attributes: ["title", "totalPages"],
+      relationships: {
+        author: () => new UserSerializer().serializerConfig(),
+      },
+    };
+  };
+}
+
+class MovieSerializer extends JSONApiSerializer {
+  public serializerConfig = () => {
+    return {
+      type: "movies",
+      attributes: ["name", "duration"],
+      relationships: {
+        director: () => new UserSerializer().serializerConfig(),
+      },
+    };
+  };
+}
+
+class ListItemSerializer extends JSONApiSerializer {
+  public serializerConfig = () => {
+    return {
+      type: "list-items",
+      attributes: [],
+      relationships: {
+        items: (item) => {
+          const { type } = item;
+
+          switch (type) {
+            case "movies":
+              return new MovieSerializer().serializerConfig();
+            case "books":
+              return new BookSerializer().serializerConfig();
+          }
+        },
+      },
+    };
+  };
+}
+
 test("JSONAPISerializer: polymorphic relationships", async () => {
-  class UserSerializer extends JSONApiSerializer {
-    public serializerConfig = () => {
-      return {
-        type: "users",
-        attributes: ["name", "last"],
-      };
-    };
-  }
-
-  class BookSerializer extends JSONApiSerializer {
-    public serializerConfig = () => {
-      return {
-        type: "books",
-        attributes: ["title", "totalPages"],
-        relationships: {
-          author: () => new UserSerializer().serializerConfig(),
-        },
-      };
-    };
-  }
-
-  class MovieSerializer extends JSONApiSerializer {
-    public serializerConfig = () => {
-      return {
-        type: "movies",
-        attributes: ["name", "duration"],
-        relationships: {
-          director: () => new UserSerializer().serializerConfig(),
-        },
-      };
-    };
-  }
-
-  class ListItemSerializer extends JSONApiSerializer {
-    public serializerConfig = () => {
-      return {
-        type: "list-items",
-        attributes: [],
-        relationships: {
-          items: (item) => {
-            const { type } = item;
-
-            switch (type) {
-              case "movies":
-                return new MovieSerializer().serializerConfig();
-              case "books":
-                return new BookSerializer().serializerConfig();
-            }
-          },
-        },
-      };
-    };
-  }
-
   const inputData = {
     id: "1",
     items: [
@@ -477,4 +501,105 @@ test("JSONAPISerializer: polymorphic relationships", async () => {
 
   expect(data.relationships.items.data[0]).toEqual({ id: "1", type: "books" });
   expect(data.relationships.items.data[1]).toEqual({ id: "1", type: "movies" });
+});
+
+test("JSONAPIDeserializer: polymorphic megapost", async () => {
+  const inputData = {
+    data: {
+      id: "1",
+      type: "list-items",
+      relationships: {
+        items: {
+          data: [
+            {
+              type: "books",
+              attributes: {
+                title: "title book number 1",
+                "total-pages": 250,
+              },
+              relationships: {
+                author: {
+                  data: {
+                    type: "users",
+                    attributes: {
+                      name: "John",
+                      last: "Doe",
+                    },
+                    relationships: {
+                      profile: {
+                        data: {
+                          type: "profiles",
+                          attributes: {
+                            gender: "male",
+                            phone: 1234,
+                          },
+                          relationships: {
+                            avatar: {
+                              data: {
+                                type: "files",
+                                attributes: {
+                                  url: "avatar-1.jpg",
+                                },
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            {
+              id: "1",
+              type: "movies",
+              attributes: {
+                title: "title movie number 1",
+                duration: 120,
+              },
+              relationships: {
+                director: {
+                  data: {
+                    id: "2",
+                    type: "users",
+                    attributes: {
+                      name: "Jhon2",
+                      last: "Doe2",
+                    },
+                    relationships: {
+                      profile: {
+                        data: {
+                          type: "profiles",
+                          attributes: {
+                            gender: "female",
+                            phone: 5678,
+                          },
+                          relationships: {
+                            avatar: {
+                              data: {
+                                type: "files",
+                                attributes: {
+                                  url: "avatar-2.jpg",
+                                },
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
+  };
+
+  // @ts-ignore @todo check this type
+  const output = await JSONAPIDeserializer.deserialize(inputData);
+  const { data } = output;
+
+  expect(data.items[0].author.profile.avatar.url).toEqual("avatar-1.jpg");
 });
