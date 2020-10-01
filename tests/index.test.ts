@@ -1,4 +1,4 @@
-import { JSONAPIDeserializer } from "./";
+import { JSONAPIDeserializer } from "../src";
 
 test("JSONAPIDeserializer:basic attributes", async () => {
   const jsonapiResponse = {
