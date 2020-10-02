@@ -88,13 +88,19 @@ class ListItemSerializer extends JSONApiSerializer {
 new ListItemSerializer.serialize({data,meta,lang,includeWhitelistKeys, megapost})
 ```
 
-#### Available serialization config
+#### Available serialize config params
 
 - **data**: The data to serialize in POJO format
 - **meta**: (optional) object to set as meta response
 - **lang**: (optional) string for i18n purposes
 - **includeWhitelistKeys**: (optional) csv string for bounding included entities. If not set all entities will be set on included array response
 - **megapost**: (optional default:false) serialize as megapost
+
+#### Available serializerConfig return object params
+
+- **type**: The type of the entity to serialize
+- **attributes**: An array of camelCase strings with the attribute names
+- **relationships**: An object with camelCase key props with function values that resolves to related serializerConfig entity
 
 ## Examples
 
