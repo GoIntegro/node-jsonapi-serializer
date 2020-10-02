@@ -13,7 +13,7 @@ import { JSONAPIDeserializer } from "node-jsonapi-serializer;
 JSONAPIDeserializer.deserialize(jsonapiResponse);
 ```
 
-### JSONApiSerializer
+### Serialization
 
 ```javascript
 import { JSONAPIDeserializer } from "node-jsonapi-serializer;
