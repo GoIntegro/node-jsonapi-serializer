@@ -2,7 +2,7 @@
 
 ## Description
 
-JSONApi lib for GOintegro use cases (support N included level, compound documents (aka "megapost"))
+JSONApi lib for GOintegro use cases (support N included compound document levels (aka "megapost"))
 
 ## Documentation
 
@@ -96,7 +96,7 @@ new ListItemSerializer.serialize({data,meta,lang,includeWhitelistKeys, megapost}
 - **includeWhitelistKeys**: (optional) csv string for bounding included entities. If not set all entities will be set on included array response
 - **megapost**: (optional default:false) serialize as megapost
 
-#### Available serializerConfig return object params
+#### Available serializerConfig return object props
 
 - **type**: The type of the entity to serialize
 - **attributes**: An array of camelCase strings with the attribute names
