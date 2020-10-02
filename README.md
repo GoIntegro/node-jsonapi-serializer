@@ -4,6 +4,14 @@
 
 JSONApi lib for GOintegro use cases (support N included level, compound documents (aka "megapost"))
 
+## Documentation
+
+### Deserialization
+
+    import { JSONAPIDeserializer } from "node-jsonapi-serializer;
+    var JSONAPISerializer = require('jsonapi-serializer').Serializer;
+    new JSONAPISerializer(type, opts).serialize(data);
+
 ## Usage
 
 ### Deserializer
@@ -106,7 +114,7 @@ const inputData = {
   },
 };
 
-const output = await JSONAPIDeserializer.deserialize(inputData);
+const output = JSONAPIDeserializer.deserialize(inputData);
 
 console.log(output)
 /*
