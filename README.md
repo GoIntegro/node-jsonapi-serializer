@@ -8,87 +8,87 @@ JSONApi lib for GOintegro use cases (support N included level, compound document
 
 ### Deserialization
 
-    ```javascript
-    import { JSONAPIDeserializer } from "node-jsonapi-serializer;
-    JSONAPIDeserializer.deserialize(jsonapiResponse);
-    ```
+```javascript
+import { JSONAPIDeserializer } from "node-jsonapi-serializer;
+JSONAPIDeserializer.deserialize(jsonapiResponse);
+```
 
 ### JSONApiSerializer
 
-    ```javascript
-    import { JSONAPIDeserializer } from "node-jsonapi-serializer;
+```javascript
+import { JSONAPIDeserializer } from "node-jsonapi-serializer;
 
-    class FileSerializer extends JSONApiSerializer {
-      public serializerConfig = () => {
-        return {
-          type: "files",
-          attributes: ["url"],
-        };
-      };
-    }
+class FileSerializer extends JSONApiSerializer {
+  public serializerConfig = () => {
+    return {
+      type: "files",
+      attributes: ["url"],
+    };
+  };
+}
 
-    class ProfileSerializer extends JSONApiSerializer {
-      public serializerConfig = () => {
-        return {
-          type: "profiles",
-          attributes: ["gender", "phone"],
-          relationships: {
-            avatar: () => new FileSerializer().serializerConfig(),
-          },
-        };
-      };
-    }
+class ProfileSerializer extends JSONApiSerializer {
+  public serializerConfig = () => {
+    return {
+      type: "profiles",
+      attributes: ["gender", "phone"],
+      relationships: {
+        avatar: () => new FileSerializer().serializerConfig(),
+      },
+    };
+  };
+}
 
-    class UserSerializer extends JSONApiSerializer {
-      public serializerConfig = () => {
-        return {
-          type: "users",
-          attributes: ["name", "last"],
-          relationships: {
-            profile: () => new ProfileSerializer().serializerConfig(),
-          },
-        };
-      };
-    }
+class UserSerializer extends JSONApiSerializer {
+  public serializerConfig = () => {
+    return {
+      type: "users",
+      attributes: ["name", "last"],
+      relationships: {
+        profile: () => new ProfileSerializer().serializerConfig(),
+      },
+    };
+  };
+}
 
-    class MovieSerializer extends JSONApiSerializer {
-      public serializerConfig = () => {
-        return {
-          type: "movies",
-          attributes: ["name", "duration"],
-          relationships: {
-            director: () => new UserSerializer().serializerConfig(),
-          },
-        };
-      };
-    }
+class MovieSerializer extends JSONApiSerializer {
+  public serializerConfig = () => {
+    return {
+      type: "movies",
+      attributes: ["name", "duration"],
+      relationships: {
+        director: () => new UserSerializer().serializerConfig(),
+      },
+    };
+  };
+}
 
-    class ListItemSerializer extends JSONApiSerializer {
-      public serializerConfig = () => {
-        return {
-          type: "list-items",
-          attributes: [],
-          relationships: {
-            items: (item) => {
-              const { type } = item;
+class ListItemSerializer extends JSONApiSerializer {
+  public serializerConfig = () => {
+    return {
+      type: "list-items",
+      attributes: [],
+      relationships: {
+        items: (item) => {
+          const { type } = item;
 
-              switch (type) {
-                case "movies":
-                  return new MovieSerializer().serializerConfig();
-                case "books":
-                  return new BookSerializer().serializerConfig();
-              }
-            },
-          },
-        };
-      };
-    }
+          switch (type) {
+            case "movies":
+              return new MovieSerializer().serializerConfig();
+            case "books":
+              return new BookSerializer().serializerConfig();
+          }
+        },
+      },
+    };
+  };
+}
 
 
-    new ListItemSerializer.serialize({data,meta,lang,includeWhitelistKeys, megapost})
-    ```
+new ListItemSerializer.serialize({data,meta,lang,includeWhitelistKeys, megapost})
+```
 
-#### Available serialization congif
+#### Available serialization config
 
 - **data**: The data to serialize in POJO format
 - **meta**: (optional) object to set as meta response
