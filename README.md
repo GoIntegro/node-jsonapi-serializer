@@ -8,17 +8,101 @@ JSONApi lib for GOintegro use cases (support N included level, compound document
 
 ### Deserialization
 
+    ```javascript
     import { JSONAPIDeserializer } from "node-jsonapi-serializer;
-    var JSONAPISerializer = require('jsonapi-serializer').Serializer;
-    new JSONAPISerializer(type, opts).serialize(data);
+    JSONAPIDeserializer.deserialize(jsonapiResponse);
+    ```
 
-## Usage
+### JSONApiSerializer
+
+    ```javascript
+    import { JSONAPIDeserializer } from "node-jsonapi-serializer;
+
+    class FileSerializer extends JSONApiSerializer {
+      public serializerConfig = () => {
+        return {
+          type: "files",
+          attributes: ["url"],
+        };
+      };
+    }
+
+    class ProfileSerializer extends JSONApiSerializer {
+      public serializerConfig = () => {
+        return {
+          type: "profiles",
+          attributes: ["gender", "phone"],
+          relationships: {
+            avatar: () => new FileSerializer().serializerConfig(),
+          },
+        };
+      };
+    }
+
+    class UserSerializer extends JSONApiSerializer {
+      public serializerConfig = () => {
+        return {
+          type: "users",
+          attributes: ["name", "last"],
+          relationships: {
+            profile: () => new ProfileSerializer().serializerConfig(),
+          },
+        };
+      };
+    }
+
+    class MovieSerializer extends JSONApiSerializer {
+      public serializerConfig = () => {
+        return {
+          type: "movies",
+          attributes: ["name", "duration"],
+          relationships: {
+            director: () => new UserSerializer().serializerConfig(),
+          },
+        };
+      };
+    }
+
+    class ListItemSerializer extends JSONApiSerializer {
+      public serializerConfig = () => {
+        return {
+          type: "list-items",
+          attributes: [],
+          relationships: {
+            items: (item) => {
+              const { type } = item;
+
+              switch (type) {
+                case "movies":
+                  return new MovieSerializer().serializerConfig();
+                case "books":
+                  return new BookSerializer().serializerConfig();
+              }
+            },
+          },
+        };
+      };
+    }
+
+
+    new ListItemSerializer.serialize({data,meta,lang,includeWhitelistKeys, megapost})
+    ```
+
+#### Available serialization congif
+
+- **data**: The data to serialize in POJO format
+- **meta**: (optional) object to set as meta response
+- **lang**: (optional) string for i18n purposes
+- **includeWhitelistKeys**: (optional) csv string for bounding included entities. If not set all entities will be set on included array response
+- **megapost**: (optional default:false) serialize as megapost
+
+## Examples
 
 ### Deserializer
 
 #### Polymorphic megapost
 
-```
+```javascript
 import { JSONAPIDeserializer } from "node-jsonapi-serializer;
 
 const inputData = {
@@ -165,7 +249,7 @@ console.log(output)
 
 #### Polymorphic megapost (client side case)
 
-```
+```javascript
 import { JSONApiSerializer } from "node-jsonapi-serializer";
 
 class FileSerializer extends JSONApiSerializer {
