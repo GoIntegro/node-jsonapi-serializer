@@ -109,8 +109,6 @@ new ListItemSerializer.serialize({data,meta,lang,includeWhitelistKeys, megapost}
 #### Polymorphic megapost
 
 ```javascript
-import { JSONAPIDeserializer } from "node-jsonapi-serializer;
-
 const inputData = {
   data: {
     id: "1",
@@ -206,7 +204,7 @@ const inputData = {
 
 const output = JSONAPIDeserializer.deserialize(inputData);
 
-console.log(output)
+console.log(output);
 /*
 {
   items: [
@@ -256,87 +254,6 @@ console.log(output)
 #### Polymorphic megapost (client side case)
 
 ```javascript
-import { JSONApiSerializer } from "node-jsonapi-serializer";
-
-class FileSerializer extends JSONApiSerializer {
-  public serializerConfig = () => {
-    return {
-      type: "files",
-      attributes: ["url"],
-    };
-  };
-}
-
-class ProfileSerializer extends JSONApiSerializer {
-  public serializerConfig = () => {
-    return {
-      type: "profiles",
-      attributes: ["gender", "phone"],
-      relationships: {
-        avatar: () => new FileSerializer().serializerConfig(),
-      },
-    };
-  };
-}
-
-class UserSerializer extends JSONApiSerializer {
-  public serializerConfig = () => {
-    return {
-      type: "users",
-      attributes: ["name", "last"],
-      relationships: {
-        profile: () => new ProfileSerializer().serializerConfig(),
-      },
-    };
-  };
-}
-
-class BookSerializer extends JSONApiSerializer {
-  public serializerConfig = () => {
-    return {
-      type: "books",
-      attributes: ["title", "totalPages"],
-      relationships: {
-        author: () => new UserSerializer().serializerConfig(),
-      },
-    };
-  };
-}
-
-class MovieSerializer extends JSONApiSerializer {
-  public serializerConfig = () => {
-    return {
-      type: "movies",
-      attributes: ["name", "duration"],
-      relationships: {
-        director: () => new UserSerializer().serializerConfig(),
-      },
-    };
-  };
-}
-
-class ListItemSerializer extends JSONApiSerializer {
-  public serializerConfig = () => {
-    return {
-      type: "list-items",
-      attributes: [],
-      relationships: {
-        items: (item) => {
-          const { type } = item;
-
-          switch (type) {
-            case "movies":
-              return new MovieSerializer().serializerConfig();
-            case "books":
-              return new BookSerializer().serializerConfig();
-          }
-        },
-      },
-    };
-  };
-}
-
-
 const inputData = {
   items: [
     {
@@ -377,7 +294,10 @@ const inputData = {
 const listItemSerializer = new ListItemSerializer();
 
 // nested with includes
-const output = listItemSerializer.serialize({ data: inputData, megapost: true });
+const output = listItemSerializer.serialize({
+  data: inputData,
+  megapost: true,
+});
 
 console.log(output);
 
