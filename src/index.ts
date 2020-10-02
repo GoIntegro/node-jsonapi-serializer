@@ -402,7 +402,7 @@ export class JSONApiSerializer {
             );
 
             if (megapost) {
-              output.relationships[dashCaseKey][i] = serializedEntity;
+              output.relationships[dashCaseKey].data[i] = serializedEntity;
             } else {
               this.addToIncluded(includedEntities, serializedEntity);
             }
@@ -431,7 +431,7 @@ export class JSONApiSerializer {
           );
 
           if (megapost) {
-            output.relationships[dashCaseKey] = serializedEntity;
+            output.relationships[dashCaseKey].data = serializedEntity;
           } else {
             this.addToIncluded(includedEntities, serializedEntity);
           }
