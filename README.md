@@ -153,7 +153,7 @@ console.log(output)
 */
 ```
 
-### Deserializer
+### Serializer
 
 #### Polymorphic megapost (client side case)
 
