@@ -11,7 +11,7 @@ test("JSONAPIDeserializer:basic attributes", async () => {
       },
     },
   };
-  const output = await JSONAPIDeserializer.deserialize(jsonapiResponse);
+  const output = JSONAPIDeserializer.deserialize(jsonapiResponse);
   expect(output).toHaveProperty("data");
   const { data } = output;
   expect(data).toHaveProperty("type");
@@ -44,7 +44,7 @@ test("JSONAPIDeserializer:basic relationships", async () => {
       },
     },
   };
-  const output = await JSONAPIDeserializer.deserialize(jsonapiResponse);
+  const output = JSONAPIDeserializer.deserialize(jsonapiResponse);
   expect(output).toHaveProperty("data");
   const { data } = output;
   expect(data.photos).toEqual(["1", "2"]);
@@ -99,7 +99,7 @@ test("JSONAPIDeserializer:included relationships", async () => {
       },
     ],
   };
-  const output = await JSONAPIDeserializer.deserialize(jsonapiResponse);
+  const output = JSONAPIDeserializer.deserialize(jsonapiResponse);
   expect(output).toHaveProperty("data");
   const { data } = output;
   expect(data.role).toEqual({ id: "1", type: "roles", title: "basic" });
@@ -299,7 +299,7 @@ test("JSONAPIDeserializer:nested included circular relationships", async () => {
       },
     ],
   };
-  const output = await JSONAPIDeserializer.deserialize(jsonapiResponse);
+  const output = JSONAPIDeserializer.deserialize(jsonapiResponse);
   const { data } = output;
   expect(data.films[0].characters[0].films[0].characters[0]).toEqual(data);
   expect(data.starships[0].pilots[1].films[0].characters[0]).toEqual(data);
@@ -598,7 +598,7 @@ test("JSONAPIDeserializer: polymorphic megapost", async () => {
   };
 
   // @ts-ignore @todo check this type
-  const output = await JSONAPIDeserializer.deserialize(inputData);
+  const output = JSONAPIDeserializer.deserialize(inputData);
   const { data } = output;
 
   expect(data.items[0].author.profile.avatar.url).toEqual("avatar-1.jpg");

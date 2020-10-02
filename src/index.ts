@@ -183,7 +183,7 @@ export const JSONAPIDeserializer = {
     return output;
   },
 
-  async deserialize({ data, included = [], meta }: JSONApiResponse) {
+  deserialize({ data, included = [], meta }: JSONApiResponse) {
     const isMultiple = data instanceof Array;
     const resolvedMap = {};
 
