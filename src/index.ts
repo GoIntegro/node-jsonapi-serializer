@@ -301,13 +301,20 @@ export class JSONApiSerializer {
     includedEntities: JSONApiResource[],
     serializedEntities: JSONApiResource[],
     lang: string,
-    includeWhitelistKeys: string[] = []
+    includeWhitelistKeys: string[] | null,
+    megapost: boolean
   ): JSONApiResource {
-    const entityId = get(data, "id") || data;
+    const entityId = get(data, "id");
     const entityType = get(data, "type") || config.type;
 
-    if (this.isEntitySerialized(serializedEntities, entityId, entityType)) {
-      return this.getSerializedEntity(serializedEntities, entityId, entityType);
+    if (entityId) {
+      if (this.isEntitySerialized(serializedEntities, entityId, entityType)) {
+        return this.getSerializedEntity(
+          serializedEntities,
+          entityId,
+          entityType
+        );
+      }
     }
 
     const { i18nAttributes = {}, i18nDefaultKey } = config;
@@ -332,8 +339,11 @@ export class JSONApiSerializer {
 
     const output: any = {
       type: get(data, "type") || config.type,
-      id: data.id.toString(),
     };
+
+    if (entityId) {
+      output.id = entityId.toString();
+    }
 
     if (!isEmpty(attributes)) {
       output.attributes = attributes;
@@ -352,25 +362,27 @@ export class JSONApiSerializer {
 
     this.addToSerializedEntities(serializedEntities, output);
     // check compound relationships and process to includes
-    forIn(relationships, (value, key) => {
-      key = camelCase(key);
-      const isKeyWhitelisted = this.isKeyWhitelistedIncluded(
-        key,
-        includeWhitelistKeys
-      );
-      if (!isKeyWhitelisted) {
-        return;
+    forIn(relationships, (value, dashCaseKey) => {
+      const key = camelCase(dashCaseKey);
+
+      if (includeWhitelistKeys) {
+        const isKeyWhitelisted = this.isKeyWhitelistedIncluded(
+          key,
+          includeWhitelistKeys
+        );
+        if (!isKeyWhitelisted) {
+          return;
+        }
       }
 
-      const newIncludeWhitelistKeys = this.removeWhitelistKey(
-        key,
-        includeWhitelistKeys
-      );
+      const newIncludeWhitelistKeys = includeWhitelistKeys
+        ? this.removeWhitelistKey(key, includeWhitelistKeys)
+        : includeWhitelistKeys;
 
       const originalValue = data[key];
-      const relationshipConfig = config.relationships[key](originalValue);
       if (Array.isArray(originalValue)) {
-        forEach(originalValue, (v) => {
+        forEach(originalValue, (v, i) => {
+          const relationshipConfig = config.relationships[key](v);
           const isCompoundValue = this.isCompoundValue(v);
           const entityId = get(v, "id") || v;
           const entityType = get(v, "type") || relationshipConfig.type;
@@ -379,20 +391,26 @@ export class JSONApiSerializer {
             isCompoundValue &&
             !this.isEntityIncluded(includedEntities, entityId, entityType)
           ) {
-            this.addToIncluded(
+            const serializedEntity = this.serializeEntity(
+              v,
+              relationshipConfig,
               includedEntities,
-              this.serializeEntity(
-                v,
-                relationshipConfig,
-                includedEntities,
-                serializedEntities,
-                lang,
-                newIncludeWhitelistKeys
-              )
+              serializedEntities,
+              lang,
+              newIncludeWhitelistKeys,
+              megapost
             );
+
+            if (megapost) {
+              output.relationships[dashCaseKey][i] = serializedEntity;
+            } else {
+              this.addToIncluded(includedEntities, serializedEntity);
+            }
           }
         });
       } else {
+        const relationshipConfig = config.relationships[key](originalValue);
+
         const isCompoundValue = this.isCompoundValue(originalValue);
         const entityId = get(originalValue, "id") || originalValue;
         const entityType =
@@ -402,17 +420,21 @@ export class JSONApiSerializer {
           isCompoundValue &&
           !this.isEntityIncluded(includedEntities, entityId, entityType)
         ) {
-          this.addToIncluded(
+          const serializedEntity = this.serializeEntity(
+            originalValue,
+            relationshipConfig,
             includedEntities,
-            this.serializeEntity(
-              originalValue,
-              relationshipConfig,
-              includedEntities,
-              serializedEntities,
-              lang,
-              newIncludeWhitelistKeys
-            )
+            serializedEntities,
+            lang,
+            newIncludeWhitelistKeys,
+            megapost
           );
+
+          if (megapost) {
+            output.relationships[dashCaseKey] = serializedEntity;
+          } else {
+            this.addToIncluded(includedEntities, serializedEntity);
+          }
         }
       }
     });
@@ -432,28 +454,32 @@ export class JSONApiSerializer {
           return acum;
         }
 
-        const relationshipConfig = config.relationships[key](value);
-
         if (Array.isArray(value)) {
           acum[kebabCase(key)] = map(value, (v, k) => {
-            const entityId = get(v, "id") || v;
+            const relationshipConfig = config.relationships[key](v);
             const entityType = get(v, "type") || relationshipConfig.type;
 
-            return {
-              id: entityId.toString(),
+            const output: any = {
               type: entityType,
             };
+
+            if (v?.id) {
+              output.id = v.id.toString();
+            }
+            return output;
           });
         } else {
-          const entityId = get(value, "id") || value;
-          const entityType = get(value, "type") || relationshipConfig.type;
+          const relationshipConfig = config.relationships[key](value);
 
-          acum[kebabCase(key)] = isNull(value)
-            ? null
-            : {
-                id: entityId.toString(),
-                type: entityType,
-              };
+          const entityType = get(value, "type") || relationshipConfig.type;
+          const output: any = {
+            type: entityType,
+          };
+
+          if (value?.id) {
+            output.id = value.id;
+          }
+          acum[kebabCase(key)] = isNull(value) ? null : output;
         }
 
         return acum;
@@ -462,13 +488,20 @@ export class JSONApiSerializer {
     );
   }
 
-  private _serialize({ data, config, meta, lang, includeWhitelistKeys }) {
+  private _serialize({
+    data,
+    config,
+    meta,
+    lang,
+    includeWhitelistKeys,
+    megapost,
+  }) {
     const output: any = {};
     let entities;
     const includedEntities = [];
     const serializedEntities = [];
 
-    includeWhitelistKeys = includeWhitelistKeys?.split(",") || [];
+    includeWhitelistKeys = includeWhitelistKeys?.split(",") || null;
 
     if (Array.isArray(data)) {
       entities = data.map((entity) => {
@@ -478,7 +511,8 @@ export class JSONApiSerializer {
           includedEntities,
           serializedEntities,
           lang,
-          includeWhitelistKeys
+          includeWhitelistKeys,
+          megapost
         );
       });
     } else {
@@ -488,7 +522,8 @@ export class JSONApiSerializer {
         includedEntities,
         serializedEntities,
         lang,
-        includeWhitelistKeys
+        includeWhitelistKeys,
+        megapost
       );
     }
 
@@ -506,13 +541,20 @@ export class JSONApiSerializer {
   }
 
   public serialize(request: SerializeRequest) {
-    const { data, meta, lang, includeWhitelistKeys } = request;
-    return this._serialize({
+    const {
       data,
-      config: this.serializerConfig(data),
       meta,
       lang,
       includeWhitelistKeys,
+      megapost = false,
+    } = request;
+    return this._serialize({
+      data,
+      config: this.serializerConfig(),
+      meta,
+      lang,
+      includeWhitelistKeys,
+      megapost,
     });
   }
 }
