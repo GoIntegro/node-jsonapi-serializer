@@ -201,7 +201,7 @@ export const JSONAPIDeserializer = {
   },
 };
 
-export class JSONApiSerializer {
+export class JSONAPISerializer {
   public serializerConfig: (data?: any) => SerializerConfig;
 
   private isCompoundValue(value: any): boolean {

@@ -1,4 +1,4 @@
-import { JSONAPIDeserializer, JSONApiSerializer } from "../src";
+import { JSONAPIDeserializer, JSONAPISerializer } from "../src";
 
 test("JSONAPIDeserializer:basic attributes", async () => {
   const jsonapiResponse = {
@@ -306,7 +306,7 @@ test("JSONAPIDeserializer:nested included circular relationships", async () => {
 });
 
 test("JSONAPISerializer: basic attributes", async () => {
-  class StarchipSerializer extends JSONApiSerializer {
+  class StarchipSerializer extends JSONAPISerializer {
     public serializerConfig = () => {
       return {
         type: "starships",
@@ -318,7 +318,7 @@ test("JSONAPISerializer: basic attributes", async () => {
     };
   }
 
-  class FilmSerializer extends JSONApiSerializer {
+  class FilmSerializer extends JSONAPISerializer {
     public serializerConfig = () => {
       return {
         type: "films",
@@ -331,7 +331,7 @@ test("JSONAPISerializer: basic attributes", async () => {
       };
     };
   }
-  class PeopleSerializer extends JSONApiSerializer {
+  class PeopleSerializer extends JSONAPISerializer {
     public serializerConfig = () => {
       return {
         type: "people",
@@ -396,7 +396,7 @@ test("JSONAPISerializer: basic attributes", async () => {
   });
 });
 
-class FileSerializer extends JSONApiSerializer {
+class FileSerializer extends JSONAPISerializer {
   public serializerConfig = () => {
     return {
       type: "files",
@@ -405,7 +405,7 @@ class FileSerializer extends JSONApiSerializer {
   };
 }
 
-class ProfileSerializer extends JSONApiSerializer {
+class ProfileSerializer extends JSONAPISerializer {
   public serializerConfig = () => {
     return {
       type: "profiles",
@@ -417,7 +417,7 @@ class ProfileSerializer extends JSONApiSerializer {
   };
 }
 
-class UserSerializer extends JSONApiSerializer {
+class UserSerializer extends JSONAPISerializer {
   public serializerConfig = () => {
     return {
       type: "users",
@@ -429,7 +429,7 @@ class UserSerializer extends JSONApiSerializer {
   };
 }
 
-class BookSerializer extends JSONApiSerializer {
+class BookSerializer extends JSONAPISerializer {
   public serializerConfig = () => {
     return {
       type: "books",
@@ -441,7 +441,7 @@ class BookSerializer extends JSONApiSerializer {
   };
 }
 
-class MovieSerializer extends JSONApiSerializer {
+class MovieSerializer extends JSONAPISerializer {
   public serializerConfig = () => {
     return {
       type: "movies",
@@ -453,7 +453,7 @@ class MovieSerializer extends JSONApiSerializer {
   };
 }
 
-class ListItemSerializer extends JSONApiSerializer {
+class ListItemSerializer extends JSONAPISerializer {
   public serializerConfig = () => {
     return {
       type: "list-items",

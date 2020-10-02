@@ -16,9 +16,9 @@ JSONAPIDeserializer.deserialize(jsonapiResponse);
 ### Serialization
 
 ```javascript
-import { JSONAPIDeserializer } from "node-jsonapi-serializer;
+import { JSONAPISerializer } from "node-jsonapi-serializer;
 
-class FileSerializer extends JSONApiSerializer {
+class FileSerializer extends JSONAPISerializer {
   public serializerConfig = () => {
     return {
       type: "files",
@@ -27,7 +27,7 @@ class FileSerializer extends JSONApiSerializer {
   };
 }
 
-class ProfileSerializer extends JSONApiSerializer {
+class ProfileSerializer extends JSONAPISerializer {
   public serializerConfig = () => {
     return {
       type: "profiles",
@@ -39,7 +39,7 @@ class ProfileSerializer extends JSONApiSerializer {
   };
 }
 
-class UserSerializer extends JSONApiSerializer {
+class UserSerializer extends JSONAPISerializer {
   public serializerConfig = () => {
     return {
       type: "users",
@@ -51,7 +51,7 @@ class UserSerializer extends JSONApiSerializer {
   };
 }
 
-class MovieSerializer extends JSONApiSerializer {
+class MovieSerializer extends JSONAPISerializer {
   public serializerConfig = () => {
     return {
       type: "movies",
@@ -63,7 +63,7 @@ class MovieSerializer extends JSONApiSerializer {
   };
 }
 
-class ListItemSerializer extends JSONApiSerializer {
+class ListItemSerializer extends JSONAPISerializer {
   public serializerConfig = () => {
     return {
       type: "list-items",
