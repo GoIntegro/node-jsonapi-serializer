@@ -57,5 +57,5 @@ export type SerializeRequest = {
   meta?: any;
   lang?: string;
   includeWhitelistKeys?: string;
-  megapost?: boolean;
+  compound?: boolean;
 };

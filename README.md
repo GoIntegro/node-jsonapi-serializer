@@ -85,7 +85,7 @@ class ListItemSerializer extends JSONAPISerializer {
 }
 
 
-new ListItemSerializer.serialize({data,meta,lang,includeWhitelistKeys, megapost})
+new ListItemSerializer.serialize({data,meta,lang,includeWhitelistKeys, compound})
 ```
 
 #### Available serialize config params
@@ -94,7 +94,7 @@ new ListItemSerializer.serialize({data,meta,lang,includeWhitelistKeys, megapost}
 - **meta**: (optional) object to set as meta response
 - **lang**: (optional) string for i18n purposes
 - **includeWhitelistKeys**: (optional) csv string for bounding included entities. If not set all entities will be set on included array response
-- **megapost**: (optional default:false) serialize as megapost
+- **compound**: (optional default:false) serialize as megapost
 
 #### Available serializerConfig return object props
 
@@ -296,7 +296,7 @@ const listItemSerializer = new ListItemSerializer();
 // nested with includes
 const output = listItemSerializer.serialize({
   data: inputData,
-  megapost: true,
+  compound: true,
 });
 
 console.log(output);

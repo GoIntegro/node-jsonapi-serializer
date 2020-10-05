@@ -302,7 +302,7 @@ export class JSONAPISerializer {
     serializedEntities: JSONApiResource[],
     lang: string,
     includeWhitelistKeys: string[] | null,
-    megapost: boolean
+    compound: boolean
   ): JSONApiResource {
     const entityId = get(data, "id");
     const entityType = get(data, "type") || config.type;
@@ -398,10 +398,10 @@ export class JSONAPISerializer {
               serializedEntities,
               lang,
               newIncludeWhitelistKeys,
-              megapost
+              compound
             );
 
-            if (megapost) {
+            if (compound) {
               output.relationships[dashCaseKey].data[i] = serializedEntity;
             } else {
               this.addToIncluded(includedEntities, serializedEntity);
@@ -427,10 +427,10 @@ export class JSONAPISerializer {
             serializedEntities,
             lang,
             newIncludeWhitelistKeys,
-            megapost
+            compound
           );
 
-          if (megapost) {
+          if (compound) {
             output.relationships[dashCaseKey].data = serializedEntity;
           } else {
             this.addToIncluded(includedEntities, serializedEntity);
@@ -494,7 +494,7 @@ export class JSONAPISerializer {
     meta,
     lang,
     includeWhitelistKeys,
-    megapost,
+    compound,
   }) {
     const output: any = {};
     let entities;
@@ -512,7 +512,7 @@ export class JSONAPISerializer {
           serializedEntities,
           lang,
           includeWhitelistKeys,
-          megapost
+          compound
         );
       });
     } else {
@@ -523,7 +523,7 @@ export class JSONAPISerializer {
         serializedEntities,
         lang,
         includeWhitelistKeys,
-        megapost
+        compound
       );
     }
 
@@ -546,7 +546,7 @@ export class JSONAPISerializer {
       meta,
       lang,
       includeWhitelistKeys,
-      megapost = false,
+      compound = false,
     } = request;
     return this._serialize({
       data,
@@ -554,7 +554,7 @@ export class JSONAPISerializer {
       meta,
       lang,
       includeWhitelistKeys,
-      megapost,
+      compound,
     });
   }
 }
