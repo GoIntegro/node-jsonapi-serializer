@@ -72,6 +72,9 @@ export const JSONAPIDeserializer = {
     resource: JSONApiResource,
     resolvedMap: T
   ): T[K] {
+    if (!resource.id || !resource.type) {
+      return;
+    }
     const key = `${resource.id}-${resource.type}`;
 
     return get(resolvedMap, key);
@@ -87,7 +90,6 @@ export const JSONAPIDeserializer = {
     const type = data.type;
 
     const resolvedItem = this.getResolvedItem(data, resolvedMap);
-
     if (resolvedItem) {
       return resolvedItem;
     }

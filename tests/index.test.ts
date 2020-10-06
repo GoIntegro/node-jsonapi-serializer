@@ -1,5 +1,36 @@
 import { JSONAPIDeserializer, JSONAPISerializer } from "../src";
 
+test("JSONAPIDeserializer:compound relationships w/o ids", async () => {
+  var jsonapiResponse = {
+    data: {
+      type: "email-lists",
+      relationships: {
+        emails: {
+          data: [
+            {
+              type: "emails",
+              attributes: {
+                email: "email-1@mail.com",
+              },
+            },
+            {
+              type: "emails",
+              attributes: {
+                email: "email-2@mail.com",
+              },
+            },
+          ],
+        },
+      },
+    },
+  };
+
+  // @ts-ignore @todo check this type
+  const output = JSONAPIDeserializer.deserialize(jsonapiResponse);
+  expect(output.data.emails[0].email).toEqual("email-1@mail.com");
+  expect(output.data.emails[1].email).toEqual("email-2@mail.com");
+});
+
 test("JSONAPIDeserializer:basic attributes", async () => {
   const jsonapiResponse = {
     data: {
