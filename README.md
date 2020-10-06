@@ -9,14 +9,14 @@ JSONApi lib for GOintegro use cases (support N included compound document levels
 ### Deserialization
 
 ```javascript
-import { JSONAPIDeserializer } from "node-jsonapi-serializer;
+import { JSONAPIDeserializer } from "node-jsonapi-serializer";
 JSONAPIDeserializer.deserialize(jsonapiResponse);
 ```
 
 ### Serialization
 
 ```javascript
-import { JSONAPISerializer } from "node-jsonapi-serializer;
+import { JSONAPISerializer } from "node-jsonapi-serializer";
 
 class FileSerializer extends JSONAPISerializer {
   public serializerConfig = () => {
