@@ -367,6 +367,10 @@ export class JSONAPISerializer {
     forIn(relationships, (value, dashCaseKey) => {
       const key = camelCase(dashCaseKey);
 
+      if (!includeWhitelistKeys) {
+        return;
+      }
+
       if (includeWhitelistKeys) {
         const isKeyWhitelisted = this.isKeyWhitelistedIncluded(
           key,
