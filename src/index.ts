@@ -453,16 +453,15 @@ export class JSONAPISerializer {
   }
 
   private serializeRelationships(data: any, config: SerializerConfig) {
-    return reduce(
-      data,
-      (acum, value, key) => {
-        if (!get(config, "relationships", {})[key]) {
-          return acum;
-        }
+    const serializedRelationships = {};
 
+    for (const property in data) {
+      // * use for in loop to include enumerables descriptors
+      if (get(config, "relationships", {})[property]) {
+        const value = data[property];
         if (Array.isArray(value)) {
-          acum[kebabCase(key)] = map(value, (v, k) => {
-            const relationshipConfig = config.relationships[key](v);
+          serializedRelationships[kebabCase(property)] = map(value, (v, k) => {
+            const relationshipConfig = config.relationships[property](v);
             const entityType = get(v, "type") || relationshipConfig.type;
 
             const output: any = {
@@ -475,7 +474,7 @@ export class JSONAPISerializer {
             return output;
           });
         } else {
-          const relationshipConfig = config.relationships[key](value);
+          const relationshipConfig = config.relationships[property](value);
 
           const entityType = get(value, "type") || relationshipConfig.type;
           const output: any = {
@@ -485,13 +484,13 @@ export class JSONAPISerializer {
           if (value?.id) {
             output.id = value.id;
           }
-          acum[kebabCase(key)] = isNull(value) ? null : output;
+          serializedRelationships[kebabCase(property)] = isNull(value)
+            ? null
+            : output;
         }
-
-        return acum;
-      },
-      {}
-    );
+      }
+    }
+    return serializedRelationships;
   }
 
   private _serialize({
