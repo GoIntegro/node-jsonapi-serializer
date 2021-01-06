@@ -634,3 +634,33 @@ test("JSONAPIDeserializer: polymorphic megapost", async () => {
 
   expect(data.items[0].author.profile.avatar.url).toEqual("avatar-1.jpg");
 });
+
+test("JSONAPISerializer: null relationship with data null", async () => {
+  const inputData = {
+    id: "1",
+    name: "El discurso del rey",
+    duration: 120,
+    director: null,
+  };
+
+  const movieSerializer = new MovieSerializer();
+  const output = movieSerializer.serialize({ data: inputData });
+  const { data } = output;
+
+  expect(data.relationships.director.data).toBeNull();
+});
+
+test("JSONAPISerializer: undefined relationship with data null", async () => {
+  const inputData = {
+    id: "1",
+    name: "El discurso del rey",
+    duration: 120,
+    director: undefined,
+  };
+
+  const movieSerializer = new MovieSerializer();
+  const output = movieSerializer.serialize({ data: inputData });
+  const { data } = output;
+
+  expect(data.relationships.director.data).toBeNull();
+});

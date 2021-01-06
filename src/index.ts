@@ -484,9 +484,8 @@ export class JSONAPISerializer {
           if (value?.id) {
             output.id = value.id;
           }
-          serializedRelationships[kebabCase(property)] = isNull(value)
-            ? null
-            : output;
+          serializedRelationships[kebabCase(property)] =
+            isNull(value) || isUndefined(value) ? null : output;
         }
       }
     }
