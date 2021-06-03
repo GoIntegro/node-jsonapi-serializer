@@ -554,7 +554,7 @@ export class JSONAPISerializer {
     } = request;
     return this._serialize({
       data,
-      config: this.serializerConfig(),
+      config: this.serializerConfig(data),
       meta,
       lang,
       includeWhitelistKeys,
