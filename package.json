@@ -1,6 +1,6 @@
 {
   "name": "node-jsonapi-serializer",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "GOintegro json-api extended serializer/deserializer",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
