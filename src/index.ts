@@ -1,32 +1,31 @@
 import {
-  isEmpty,
-  find,
-  set,
-  get,
-  transform,
-  camelCase,
-  reduce,
   assign,
-  isObject,
-  without,
-  keys,
+  camelCase,
   drop,
-  kebabCase,
-  isUndefined,
-  forIn,
+  find,
   forEach,
-  map,
+  forIn,
+  get,
+  isEmpty,
   isNull,
+  isObject,
+  isUndefined,
+  kebabCase,
+  keys,
+  map,
+  reduce,
+  set,
+  transform,
+  without,
 } from "lodash";
-
 import {
+  JSONApiData,
   JSONApiIdentity,
-  JSONApiSingleRelationshipValues,
+  JSONApiIncluded,
   JSONApiRelationshipValues,
   JSONApiResource,
-  JSONApiData,
-  JSONApiIncluded,
   JSONApiResponse,
+  JSONApiSingleRelationshipValues,
   SerializerConfig,
   SerializeRequest,
 } from "./types";
@@ -492,14 +491,8 @@ export class JSONAPISerializer {
     return serializedRelationships;
   }
 
-  private _serialize({
-    data,
-    config,
-    meta,
-    lang,
-    includeWhitelistKeys,
-    compound,
-  }) {
+  private _serialize({ data, meta, lang, includeWhitelistKeys, compound }) {
+    const config = this.serializerConfig;
     const output: any = {};
     let entities;
     const includedEntities = [];
@@ -511,7 +504,7 @@ export class JSONAPISerializer {
       entities = data.map((entity) => {
         return this.serializeEntity(
           entity,
-          config,
+          config(entity),
           includedEntities,
           serializedEntities,
           lang,
@@ -522,7 +515,7 @@ export class JSONAPISerializer {
     } else {
       entities = this.serializeEntity(
         data,
-        config,
+        config(data),
         includedEntities,
         serializedEntities,
         lang,
@@ -554,7 +547,6 @@ export class JSONAPISerializer {
     } = request;
     return this._serialize({
       data,
-      config: this.serializerConfig(data),
       meta,
       lang,
       includeWhitelistKeys,
