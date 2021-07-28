@@ -42,7 +42,7 @@ export type JSONApiResponse = {
 export type RelationshipsConfig = {
   [key: string]: {
     config: (data?: any) => SerializerConfig;
-    options?: any;
+    options?: { allowInclude: boolean };
   };
 };
 
