@@ -732,7 +732,6 @@ test("JSONAPISerializer: not allow include relationship", async () => {
   });
   const { data, included } = output;
 
-  console.log(JSON.stringify(output));
   expect(data.relationships.profile.data.id).toBe("2");
   expect(included).toBeUndefined();
 });
