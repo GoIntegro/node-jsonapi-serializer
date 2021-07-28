@@ -40,9 +40,10 @@ export type JSONApiResponse = {
 };
 
 export type RelationshipsConfig = {
-  [key: string]: (
-    data?: any
-  ) => { config: SerializerConfig; options?: RelationshipOptions };
+  [key: string]: {
+    config: (data?: any) => SerializerConfig;
+    options?: RelationshipOptions;
+  };
 };
 
 export type RelationshipOptions = {

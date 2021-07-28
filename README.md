@@ -34,11 +34,9 @@ class ProfileSerializer extends JSONAPISerializer {
       type: "profiles",
       attributes: ["gender", "phone"],
       relationships: {
-        avatar: () => {
-          return {
-            config :new FileSerializer().serializerConfig(),
-            options: { allowInclude: true }
-          }
+        avatar: {
+          config: new FileSerializer().serializerConfig,
+          options: { allowInclude: true }
         }
       },
       canBeIncluded: true
@@ -52,11 +50,9 @@ class UserSerializer extends JSONAPISerializer {
       type: "users",
       attributes: ["name", "last"],
       relationships: {
-        profile: () => {
-          return {
+        profile: {
             config: new ProfileSerializer().serializerConfig(),
             options: { allowInclude: true }
-          }
         }
       },
       canBeIncluded: true
@@ -70,11 +66,9 @@ class MovieSerializer extends JSONAPISerializer {
       type: "movies",
       attributes: ["name", "duration"],
       relationships: {
-        director: () => {
-          return {
-            config: new UserSerializer().serializerConfig(),
-            options: { allowInclude: true }
-          }
+        director: {
+          config: new UserSerializer().serializerConfig(),
+          options: { allowInclude: true }
         }
       },
       canBeIncluded: true
@@ -88,23 +82,20 @@ class ListItemSerializer extends JSONAPISerializer {
       type: "list-items",
       attributes: [],
       relationships: {
-        items: (item) => {
-          const { type } = item;
-
-          switch (type) {
-            case "movies":
-              return {
-                config: new MovieSerializer().serializerConfig(),
-                options: { allowInclude: true }
-              }
-            case "books":
-              return {
-                config: new BookSerializer().serializerConfig(),
-                options: { allowInclude: true }
-              }
-          }
+        items: {
+          config: (item) => {
+            const { type } = item;
+            switch (type) {
+              case "movies":
+                return new MovieSerializer().serializerConfig();
+              case "books":
+                return new BookSerializer().serializerConfig();
+            }
+          },
+          options: { allowInclude: true }
         },
       },
+      canBeIncluded: true
     };
   };
 }
