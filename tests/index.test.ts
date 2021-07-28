@@ -689,7 +689,7 @@ test("JSONAPISerializer: not allow include relationship", async () => {
           profile: () => {
             return {
               config: new ProfileSerializer().serializerConfig(),
-              optios: { allowInclude: false },
+              options: { allowInclude: false },
             };
           },
         },
@@ -711,9 +711,13 @@ test("JSONAPISerializer: not allow include relationship", async () => {
     },
   };
 
-  const output = userSerializer.serialize({ data: inputData });
-  const { data, includes } = output;
+  const output = userSerializer.serialize({
+    data: inputData,
+    includeWhitelistKeys: "profile",
+  });
+  const { data, included } = output;
 
+  console.log(JSON.stringify(output));
   expect(data.relationships.profile.data.id).toBe("2");
-  expect(includes).toBeUndefined();
+  expect(included).toBeUndefined();
 });
