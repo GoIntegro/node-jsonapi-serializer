@@ -400,9 +400,10 @@ export class JSONAPISerializer {
       if (Array.isArray(originalValue)) {
         forEach(originalValue, (v, i) => {
           const {
-            config: relationshipConfig,
+            config: rc,
             options: relationshipOptions,
-          } = config.relationships[key](v);
+          } = config.relationships[key];
+          const relationshipConfig = rc(v);
           const isCompoundValue = this.isCompoundValue(v);
           const entityId = get(v, "id") || v;
           const entityType = get(v, "type") || relationshipConfig.type;
@@ -435,9 +436,10 @@ export class JSONAPISerializer {
         });
       } else {
         const {
-          config: relationshipConfig,
+          config: rc,
           options: relationshipOptions,
-        } = config.relationships[key](originalValue);
+        } = config.relationships[key];
+        const relationshipConfig = rc(originalValue);
 
         const isCompoundValue = this.isCompoundValue(originalValue);
         const entityId = get(originalValue, "id") || originalValue;
@@ -489,9 +491,8 @@ export class JSONAPISerializer {
         const value = data[property];
         if (Array.isArray(value)) {
           serializedRelationships[kebabCase(property)] = map(value, (v, k) => {
-            const { config: relationshipConfig } = config.relationships[
-              property
-            ](v);
+            const { config: rc } = config.relationships[property];
+            const relationshipConfig = rc(v);
             const entityType = get(v, "type") || relationshipConfig.type;
 
             const output: any = {
@@ -504,9 +505,8 @@ export class JSONAPISerializer {
             return output;
           });
         } else {
-          const { config: relationshipConfig } = config.relationships[property](
-            value
-          );
+          const { config: rc } = config.relationships[property];
+          const relationshipConfig = rc(value);
 
           const entityType = get(value, "type") || relationshipConfig.type;
           const output: any = {

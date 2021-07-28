@@ -343,9 +343,7 @@ test("JSONAPISerializer: basic attributes", async () => {
         type: "starships",
         attributes: ["name", "model"],
         relationships: {
-          pilots: () => {
-            return { config: new PeopleSerializer().serializerConfig() };
-          },
+          pilots: { config: new PeopleSerializer().serializerConfig },
         },
       };
     };
@@ -357,9 +355,7 @@ test("JSONAPISerializer: basic attributes", async () => {
         type: "films",
         attributes: ["title", "director", "producer"],
         relationships: {
-          characters: () => {
-            return { config: new PeopleSerializer().serializerConfig() };
-          },
+          characters: { config: new PeopleSerializer().serializerConfig },
         },
       };
     };
@@ -370,12 +366,8 @@ test("JSONAPISerializer: basic attributes", async () => {
         type: "people",
         attributes: ["name", "height", "mass"],
         relationships: {
-          films: () => {
-            return { config: new FilmSerializer().serializerConfig() };
-          },
-          starships: () => {
-            return { config: new StarchipSerializer().serializerConfig() };
-          },
+          films: { config: new FilmSerializer().serializerConfig },
+          starships: { config: new StarchipSerializer().serializerConfig },
         },
       };
     };
@@ -448,9 +440,7 @@ class ProfileSerializer extends JSONAPISerializer {
       type: "profiles",
       attributes: ["gender", "phone"],
       relationships: {
-        avatar: () => {
-          return { config: new FileSerializer().serializerConfig() };
-        },
+        avatar: { config: new FileSerializer().serializerConfig },
       },
     };
   };
@@ -462,9 +452,7 @@ class UserSerializer extends JSONAPISerializer {
       type: "users",
       attributes: ["name", "last"],
       relationships: {
-        profile: () => {
-          return { config: new ProfileSerializer().serializerConfig() };
-        },
+        profile: { config: new ProfileSerializer().serializerConfig },
       },
     };
   };
@@ -476,9 +464,7 @@ class BookSerializer extends JSONAPISerializer {
       type: "books",
       attributes: ["title", "totalPages"],
       relationships: {
-        author: () => {
-          return { config: new UserSerializer().serializerConfig() };
-        },
+        author: { config: new UserSerializer().serializerConfig },
       },
     };
   };
@@ -490,9 +476,7 @@ class MovieSerializer extends JSONAPISerializer {
       type: "movies",
       attributes: ["name", "duration"],
       relationships: {
-        director: () => {
-          return { config: new UserSerializer().serializerConfig() };
-        },
+        director: { config: new UserSerializer().serializerConfig },
       },
     };
   };
@@ -504,15 +488,16 @@ class ListItemSerializer extends JSONAPISerializer {
       type: "list-items",
       attributes: [],
       relationships: {
-        items: (item) => {
-          const { type } = item;
-
-          switch (type) {
-            case "movies":
-              return { config: new MovieSerializer().serializerConfig() };
-            case "books":
-              return { config: new BookSerializer().serializerConfig() };
-          }
+        items: {
+          config: (item) => {
+            const { type } = item;
+            switch (type) {
+              case "movies":
+                return new MovieSerializer().serializerConfig();
+              case "books":
+                return new BookSerializer().serializerConfig();
+            }
+          },
         },
       },
     };
@@ -687,9 +672,7 @@ test("JSONAPISerializer: not allow include relationship", async () => {
         type: "profiles",
         attributes: ["gender", "phone"],
         relationships: {
-          avatar: () => {
-            return { config: new FileSerializer().serializerConfig() };
-          },
+          avatar: { config: new FileSerializer().serializerConfig },
         },
       };
     };
@@ -701,11 +684,9 @@ test("JSONAPISerializer: not allow include relationship", async () => {
         type: "users",
         attributes: ["name", "last"],
         relationships: {
-          profile: () => {
-            return {
-              config: new ProfileSerializer().serializerConfig(),
-              options: { allowInclude: true },
-            };
+          profile: {
+            config: new ProfileSerializer().serializerConfig,
+            options: { allowInclude: true },
           },
         },
       };
