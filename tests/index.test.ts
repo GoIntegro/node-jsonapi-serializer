@@ -678,3 +678,42 @@ test("JSONAPISerializer: undefined relationship with data null", async () => {
 
   expect(data.relationships.director.data).toBeNull();
 });
+
+test("JSONAPISerializer: not allow include relationship", async () => {
+  class UserSerializer extends JSONAPISerializer {
+    public serializerConfig = () => {
+      return {
+        type: "users",
+        attributes: ["name", "last"],
+        relationships: {
+          profile: () => {
+            return {
+              config: new ProfileSerializer().serializerConfig(),
+              optios: { allowInclude: false },
+            };
+          },
+        },
+      };
+    };
+  }
+  const userSerializer = new UserSerializer();
+  const inputData = {
+    id: "1",
+    name: "Harrison",
+    last: "Ford",
+    profile: {
+      id: "2",
+      gender: "male",
+      phone: "+54112223333",
+      avatar: {
+        url: "https://file.com",
+      },
+    },
+  };
+
+  const output = userSerializer.serialize({ data: inputData });
+  const { data, includes } = output;
+
+  expect(data.relationships.profile.data.id).toBe("2");
+  expect(includes).toBeUndefined();
+});
