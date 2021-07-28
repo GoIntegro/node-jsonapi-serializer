@@ -51,8 +51,8 @@ class UserSerializer extends JSONAPISerializer {
       attributes: ["name", "last"],
       relationships: {
         profile: {
-            config: new ProfileSerializer().serializerConfig(),
-            options: { allowInclude: true }
+          config: new ProfileSerializer().serializerConfig,
+          options: { allowInclude: true }
         }
       },
       canBeIncluded: true
@@ -67,7 +67,7 @@ class MovieSerializer extends JSONAPISerializer {
       attributes: ["name", "duration"],
       relationships: {
         director: {
-          config: new UserSerializer().serializerConfig(),
+          config: new UserSerializer().serializerConfig,
           options: { allowInclude: true }
         }
       },
