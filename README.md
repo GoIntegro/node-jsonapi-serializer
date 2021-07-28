@@ -23,6 +23,7 @@ class FileSerializer extends JSONAPISerializer {
     return {
       type: "files",
       attributes: ["url"],
+      canBeIncluded: true
     };
   };
 }
@@ -33,8 +34,14 @@ class ProfileSerializer extends JSONAPISerializer {
       type: "profiles",
       attributes: ["gender", "phone"],
       relationships: {
-        avatar: () => new FileSerializer().serializerConfig(),
+        avatar: () => {
+          return {
+            config :new FileSerializer().serializerConfig(),
+            options: { allowInclude: true }
+          }
+        }
       },
+      canBeIncluded: true
     };
   };
 }
@@ -45,8 +52,14 @@ class UserSerializer extends JSONAPISerializer {
       type: "users",
       attributes: ["name", "last"],
       relationships: {
-        profile: () => new ProfileSerializer().serializerConfig(),
+        profile: () => {
+          return {
+            config: new ProfileSerializer().serializerConfig(),
+            options: { allowInclude: true }
+          }
+        }
       },
+      canBeIncluded: true
     };
   };
 }
@@ -57,8 +70,14 @@ class MovieSerializer extends JSONAPISerializer {
       type: "movies",
       attributes: ["name", "duration"],
       relationships: {
-        director: () => new UserSerializer().serializerConfig(),
+        director: () => {
+          return {
+            config: new UserSerializer().serializerConfig(),
+            options: { allowInclude: true }
+          }
+        }
       },
+      canBeIncluded: true
     };
   };
 }
@@ -74,9 +93,15 @@ class ListItemSerializer extends JSONAPISerializer {
 
           switch (type) {
             case "movies":
-              return new MovieSerializer().serializerConfig();
+              return {
+                config: new MovieSerializer().serializerConfig(),
+                options: { allowInclude: true }
+              }
             case "books":
-              return new BookSerializer().serializerConfig();
+              return {
+                config: new BookSerializer().serializerConfig(),
+                options: { allowInclude: true }
+              }
           }
         },
       },
@@ -85,7 +110,7 @@ class ListItemSerializer extends JSONAPISerializer {
 }
 
 
-new ListItemSerializer.serialize({data,meta,lang,includeWhitelistKeys, compound})
+new ListItemSerializer.serialize({data,meta,lang,includeWhitelistKeys,compound})
 ```
 
 #### Available serialize config params
@@ -100,7 +125,8 @@ new ListItemSerializer.serialize({data,meta,lang,includeWhitelistKeys, compound}
 
 - **type**: The type of the entity to serialize
 - **attributes**: An array of camelCase strings with the attribute names
-- **relationships**: An object with camelCase key props with function values that resolves to related serializerConfig entity
+- **relationships**: An object with camelCase key props with function values that resolves to an object with config key related to another serializerConfig entity and relationship options
+- **canBeIncluded**: (optional boolean default:true) allows resource to be appended to included results
 
 ## Examples
 
