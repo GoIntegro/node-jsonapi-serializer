@@ -365,12 +365,8 @@ export class JSONAPISerializer {
     // check compound relationships and process to includes
     forIn(relationships, (value, dashCaseKey) => {
       const key = camelCase(dashCaseKey);
-      const {
-        config: rc,
-        options = { allowInclude: true },
-      } = config.relationships[key];
 
-      if (!includeWhitelistKeys || !options.allowInclude) {
+      if (!includeWhitelistKeys) {
         return;
       }
 
@@ -392,16 +388,15 @@ export class JSONAPISerializer {
       if (Array.isArray(originalValue)) {
         forEach(originalValue, (v, i) => {
           const {
-            config: rc,
-            options = { allowInclude: true },
-          } = config.relationships[key];
-          const relationshipConfig = rc(v);
+            config: relationshipConfig,
+            options: relationshipOptions = { allowInclude: true },
+          } = config.relationships[key](v);
           const isCompoundValue = this.isCompoundValue(v);
           const entityId = get(v, "id") || v;
           const entityType = get(v, "type") || relationshipConfig.type;
 
           if (
-            options.allowInclude &&
+            relationshipOptions.allowInclude &&
             isCompoundValue &&
             !this.isEntityIncluded(includedEntities, entityId, entityType)
           ) {
@@ -417,17 +412,16 @@ export class JSONAPISerializer {
 
             if (compound) {
               output.relationships[dashCaseKey].data[i] = serializedEntity;
-            } else if (options.allowInclude) {
+            } else if (relationshipOptions.allowInclude) {
               this.addToIncluded(includedEntities, serializedEntity);
             }
           }
         });
       } else {
         const {
-          config: rc,
-          options = { allowInclude: true },
-        } = config.relationships[key];
-        const relationshipConfig = rc(originalValue);
+          config: relationshipConfig,
+          options: relationshipOptions = { allowInclude: true },
+        } = config.relationships[key](originalValue);
 
         const isCompoundValue = this.isCompoundValue(originalValue);
         const entityId = get(originalValue, "id") || originalValue;
@@ -435,7 +429,7 @@ export class JSONAPISerializer {
           get(originalValue, "type") || relationshipConfig.type;
 
         if (
-          options.allowInclude &&
+          relationshipOptions.allowInclude &&
           isCompoundValue &&
           !this.isEntityIncluded(includedEntities, entityId, entityType)
         ) {
@@ -451,7 +445,7 @@ export class JSONAPISerializer {
 
           if (compound) {
             output.relationships[dashCaseKey].data = serializedEntity;
-          } else if (options.allowInclude) {
+          } else if (relationshipOptions.allowInclude) {
             this.addToIncluded(includedEntities, serializedEntity);
           }
         }
@@ -474,12 +468,9 @@ export class JSONAPISerializer {
         const value = data[property];
         if (Array.isArray(value)) {
           serializedRelationships[kebabCase(property)] = map(value, (v, k) => {
-            const {
-              config: rc,
-              options = { allowInclude: true },
-            } = config.relationships[property];
-            const relationshipConfig = rc(v);
-
+            const { config: relationshipConfig } = config.relationships[
+              property
+            ](v);
             const entityType = get(v, "type") || relationshipConfig.type;
 
             const output: any = {
@@ -492,11 +483,9 @@ export class JSONAPISerializer {
             return output;
           });
         } else {
-          const {
-            config: rc,
-            options = { allowInclude: true },
-          } = config.relationships[property];
-          const relationshipConfig = rc(value);
+          const { config: relationshipConfig } = config.relationships[property](
+            value
+          );
 
           const entityType = get(value, "type") || relationshipConfig.type;
           const output: any = {
@@ -515,7 +504,7 @@ export class JSONAPISerializer {
   }
 
   private _serialize({ data, meta, lang, includeWhitelistKeys, compound }) {
-    const serializerConfig = this.serializerConfig;
+    const config = this.serializerConfig;
     const output: any = {};
     let entities;
     const includedEntities = [];
@@ -527,7 +516,7 @@ export class JSONAPISerializer {
       entities = data.map((entity) => {
         return this.serializeEntity(
           entity,
-          serializerConfig(entity),
+          config(entity),
           includedEntities,
           serializedEntities,
           lang,
@@ -538,7 +527,7 @@ export class JSONAPISerializer {
     } else {
       entities = this.serializeEntity(
         data,
-        serializerConfig(data),
+        config(data),
         includedEntities,
         serializedEntities,
         lang,
