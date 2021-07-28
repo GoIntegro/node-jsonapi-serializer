@@ -343,7 +343,7 @@ test("JSONAPISerializer: basic attributes", async () => {
         type: "starships",
         attributes: ["name", "model"],
         relationships: {
-          pilots: () => new PeopleSerializer().serializerConfig(),
+          pilots: { config: new PeopleSerializer().serializerConfig },
         },
       };
     };
@@ -355,9 +355,7 @@ test("JSONAPISerializer: basic attributes", async () => {
         type: "films",
         attributes: ["title", "director", "producer"],
         relationships: {
-          characters: () => {
-            return new PeopleSerializer().serializerConfig();
-          },
+          characters: { config: new PeopleSerializer().serializerConfig },
         },
       };
     };
@@ -368,8 +366,8 @@ test("JSONAPISerializer: basic attributes", async () => {
         type: "people",
         attributes: ["name", "height", "mass"],
         relationships: {
-          films: () => new FilmSerializer().serializerConfig(),
-          starships: () => new StarchipSerializer().serializerConfig(),
+          films: { config: new FilmSerializer().serializerConfig },
+          starships: { config: new StarchipSerializer().serializerConfig },
         },
       };
     };
@@ -442,7 +440,7 @@ class ProfileSerializer extends JSONAPISerializer {
       type: "profiles",
       attributes: ["gender", "phone"],
       relationships: {
-        avatar: () => new FileSerializer().serializerConfig(),
+        avatar: { config: new FileSerializer().serializerConfig },
       },
     };
   };
@@ -454,7 +452,7 @@ class UserSerializer extends JSONAPISerializer {
       type: "users",
       attributes: ["name", "last"],
       relationships: {
-        profile: () => new ProfileSerializer().serializerConfig(),
+        profile: { config: new ProfileSerializer().serializerConfig },
       },
     };
   };
@@ -466,7 +464,7 @@ class BookSerializer extends JSONAPISerializer {
       type: "books",
       attributes: ["title", "totalPages"],
       relationships: {
-        author: () => new UserSerializer().serializerConfig(),
+        author: { config: new UserSerializer().serializerConfig },
       },
     };
   };
@@ -478,7 +476,7 @@ class MovieSerializer extends JSONAPISerializer {
       type: "movies",
       attributes: ["name", "duration"],
       relationships: {
-        director: () => new UserSerializer().serializerConfig(),
+        director: { config: new UserSerializer().serializerConfig },
       },
     };
   };
@@ -490,15 +488,17 @@ class ListItemSerializer extends JSONAPISerializer {
       type: "list-items",
       attributes: [],
       relationships: {
-        items: (item) => {
-          const { type } = item;
+        items: {
+          config: (item) => {
+            const { type } = item;
 
-          switch (type) {
-            case "movies":
-              return new MovieSerializer().serializerConfig();
-            case "books":
-              return new BookSerializer().serializerConfig();
-          }
+            switch (type) {
+              case "movies":
+                return new MovieSerializer().serializerConfig();
+              case "books":
+                return new BookSerializer().serializerConfig();
+            }
+          },
         },
       },
     };
