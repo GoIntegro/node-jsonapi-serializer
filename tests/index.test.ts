@@ -680,6 +680,21 @@ test("JSONAPISerializer: undefined relationship with data null", async () => {
 });
 
 test("JSONAPISerializer: not allow include relationship", async () => {
+  class ProfileSerializer extends JSONAPISerializer {
+    public serializerConfig = () => {
+      return {
+        canBeIncluded: false,
+        type: "profiles",
+        attributes: ["gender", "phone"],
+        relationships: {
+          avatar: () => {
+            return { config: new FileSerializer().serializerConfig() };
+          },
+        },
+      };
+    };
+  }
+
   class UserSerializer extends JSONAPISerializer {
     public serializerConfig = () => {
       return {
@@ -689,7 +704,7 @@ test("JSONAPISerializer: not allow include relationship", async () => {
           profile: () => {
             return {
               config: new ProfileSerializer().serializerConfig(),
-              options: { allowInclude: false },
+              options: { allowInclude: true },
             };
           },
         },

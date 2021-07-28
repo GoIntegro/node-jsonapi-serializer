@@ -28,6 +28,7 @@ import {
   JSONApiSingleRelationshipValues,
   SerializerConfig,
   SerializeRequest,
+  RelationshipOptions,
 } from "./types";
 
 export const JSONAPIDeserializer = {
@@ -296,6 +297,17 @@ export class JSONAPISerializer {
     );
   }
 
+  private shouldIncludeRelationship(
+    config: SerializerConfig,
+    relationshipOptions?: RelationshipOptions
+  ) {
+    const canBeIncluded = config?.canBeIncluded == false ? false : true;
+    const allowInclude =
+      relationshipOptions?.allowInclude == false ? false : true;
+
+    return canBeIncluded && allowInclude;
+  }
+
   private serializeEntity(
     data: any,
     config: SerializerConfig,
@@ -389,14 +401,18 @@ export class JSONAPISerializer {
         forEach(originalValue, (v, i) => {
           const {
             config: relationshipConfig,
-            options: relationshipOptions = { allowInclude: true },
+            options: relationshipOptions,
           } = config.relationships[key](v);
           const isCompoundValue = this.isCompoundValue(v);
           const entityId = get(v, "id") || v;
           const entityType = get(v, "type") || relationshipConfig.type;
+          const shouldInclude = this.shouldIncludeRelationship(
+            relationshipConfig,
+            relationshipOptions
+          );
 
           if (
-            relationshipOptions.allowInclude &&
+            shouldInclude &&
             isCompoundValue &&
             !this.isEntityIncluded(includedEntities, entityId, entityType)
           ) {
@@ -412,7 +428,7 @@ export class JSONAPISerializer {
 
             if (compound) {
               output.relationships[dashCaseKey].data[i] = serializedEntity;
-            } else if (relationshipOptions.allowInclude) {
+            } else if (shouldInclude) {
               this.addToIncluded(includedEntities, serializedEntity);
             }
           }
@@ -420,7 +436,7 @@ export class JSONAPISerializer {
       } else {
         const {
           config: relationshipConfig,
-          options: relationshipOptions = { allowInclude: true },
+          options: relationshipOptions,
         } = config.relationships[key](originalValue);
 
         const isCompoundValue = this.isCompoundValue(originalValue);
@@ -428,8 +444,13 @@ export class JSONAPISerializer {
         const entityType =
           get(originalValue, "type") || relationshipConfig.type;
 
+        const shouldInclude = this.shouldIncludeRelationship(
+          relationshipConfig,
+          relationshipOptions
+        );
+
         if (
-          relationshipOptions.allowInclude &&
+          shouldInclude &&
           isCompoundValue &&
           !this.isEntityIncluded(includedEntities, entityId, entityType)
         ) {
@@ -445,7 +466,7 @@ export class JSONAPISerializer {
 
           if (compound) {
             output.relationships[dashCaseKey].data = serializedEntity;
-          } else if (relationshipOptions.allowInclude) {
+          } else if (shouldInclude) {
             this.addToIncluded(includedEntities, serializedEntity);
           }
         }
