@@ -10,8 +10,17 @@ JSONApi lib for GOintegro use cases (support N included compound document levels
 
 ```javascript
 import { JSONAPIDeserializer } from "node-jsonapi-serializer";
-JSONAPIDeserializer.deserialize(jsonapiResponse);
+JSONAPIDeserializer.deserialize(jsonapiResponse, {
+  keepRelationshipsTypes: false,
+});
 ```
+
+#### Available deserialize config params
+
+- **keepRelationshipsTypes**: (optional boolean default:false) Defines if relationships should keep type property.
+  If the flag is false, the value will be the relationship value will be a string | []string | null | [].
+  If the flag is true, the value will be {id, type} | []{id, type}.
+  > > > Note: if the relationship has a related included object, the included object will be set as the relationship value.
 
 ### Serialization
 
