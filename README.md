@@ -20,7 +20,7 @@ JSONAPIDeserializer.deserialize(jsonapiResponse, {
 - **keepRelationshipsTypes**: (optional boolean default:false) Defines if relationships should keep type property.
   If the flag is false, the value will be the relationship value will be a string | []string | null | [].
   If the flag is true, the value will be {id, type} | []{id, type}.
-  > > > Note: if the relationship has a related included object, the included object will be set as the relationship value.
+  > Note: if the relationship has a related included object, the included object will be set as the relationship value.
 
 ### Serialization
 
