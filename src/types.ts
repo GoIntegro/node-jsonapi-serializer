@@ -67,3 +67,7 @@ export type SerializeRequest = {
   includeWhitelistKeys?: string;
   compound?: boolean;
 };
+
+export type DeserializerOptions = {
+  keepRelationshipsTypes: boolean;
+};

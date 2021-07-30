@@ -29,6 +29,7 @@ import {
   SerializerConfig,
   SerializeRequest,
   RelationshipOptions,
+  DeserializerOptions,
 } from "./types";
 
 export const JSONAPIDeserializer = {
@@ -83,11 +84,13 @@ export const JSONAPIDeserializer = {
   _deserialize(
     data: JSONApiResource,
     includedData: JSONApiIncluded,
-    resolvedMap: any
+    resolvedMap: any,
+    deserializerOptions?: DeserializerOptions
   ): { [s: string]: any } {
     const output: any = {};
     const id = data.id || null;
     const type = data.type;
+    const { keepRelationshipsTypes } = deserializerOptions;
 
     const resolvedItem = this.getResolvedItem(data, resolvedMap);
     if (resolvedItem) {
@@ -132,7 +135,8 @@ export const JSONAPIDeserializer = {
               return this._deserialize(
                 relationshipItemData,
                 includedData,
-                resolvedMap
+                resolvedMap,
+                deserializerOptions
               );
             }
 
@@ -141,9 +145,18 @@ export const JSONAPIDeserializer = {
               itemType,
               includedData
             );
-            return matchedIncluded
-              ? this._deserialize(matchedIncluded, includedData, resolvedMap)
-              : itemId;
+            if (matchedIncluded) {
+              return this._deserialize(
+                matchedIncluded,
+                includedData,
+                resolvedMap,
+                deserializerOptions
+              );
+            } else if (keepRelationshipsTypes) {
+              return { id: itemId, type: itemType };
+            } else {
+              return itemId;
+            }
           });
         } else {
           const isCompoundValue = this.isCompoundValue(relationshipData);
@@ -161,12 +174,20 @@ export const JSONAPIDeserializer = {
             acum[camelCase(key)] = this._deserialize(
               relationshipData as JSONApiSingleRelationshipValues,
               includedData,
-              resolvedMap
+              resolvedMap,
+              deserializerOptions
             );
+          } else if (matchedIncluded) {
+            acum[camelCase(key)] = this._deserialize(
+              matchedIncluded,
+              includedData,
+              resolvedMap,
+              deserializerOptions
+            );
+          } else if (keepRelationshipsTypes) {
+            acum[camelCase(key)] = { id: itemId, type: itemType };
           } else {
-            acum[camelCase(key)] = matchedIncluded
-              ? this._deserialize(matchedIncluded, includedData, resolvedMap)
-              : itemId;
+            acum[camelCase(key)] = itemId;
           }
         }
         return acum;
@@ -185,15 +206,29 @@ export const JSONAPIDeserializer = {
     return output;
   },
 
-  deserialize({ data, included = [], meta }: JSONApiResponse) {
+  deserialize(
+    { data, included = [], meta }: JSONApiResponse,
+    options?: DeserializerOptions
+  ) {
     const isMultiple = data instanceof Array;
     const resolvedMap = {};
+    const deserializerOptions = options ? options : {};
 
     const output = isMultiple
       ? (data as JSONApiResource[]).map((item) => {
-          return this._deserialize(item, included, resolvedMap);
+          return this._deserialize(
+            item,
+            included,
+            resolvedMap,
+            deserializerOptions
+          );
         })
-      : this._deserialize(data as JSONApiResource, included, resolvedMap);
+      : this._deserialize(
+          data as JSONApiResource,
+          included,
+          resolvedMap,
+          deserializerOptions
+        );
 
     if (meta) {
       return { data: output, meta };

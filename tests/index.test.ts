@@ -75,11 +75,46 @@ test("JSONAPIDeserializer:basic relationships", async () => {
       },
     },
   };
-  const output = JSONAPIDeserializer.deserialize(jsonapiResponse);
+  const output = JSONAPIDeserializer.deserialize(jsonapiResponse, {
+    keepRelationshipsTypes: false,
+  });
   expect(output).toHaveProperty("data");
   const { data } = output;
   expect(data.photos).toEqual(["1", "2"]);
   expect(data.role).toEqual("1");
+});
+
+test("JSONAPIDeserializer:basic relationships with types", async () => {
+  const jsonapiResponse = {
+    data: {
+      id: "1",
+      type: "users",
+      attributes: {
+        "first-name": "John",
+        "last-name": "Doe",
+      },
+      relationships: {
+        role: {
+          data: {
+            id: "1",
+            type: "roles",
+          },
+        },
+        photos: {
+          data: [
+            { id: "1", type: "files" },
+            { id: "2", type: "files" },
+          ],
+        },
+      },
+    },
+  };
+  const output = JSONAPIDeserializer.deserialize(jsonapiResponse, {
+    keepRelationshipsTypes: true,
+  });
+  const { data } = output;
+  expect(data.photos[0]).toEqual({ id: "1", type: "files" });
+  expect(data.photos[1]).toEqual({ id: "2", type: "files" });
 });
 
 test("JSONAPIDeserializer:included relationships", async () => {
