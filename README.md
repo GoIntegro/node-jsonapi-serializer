@@ -1,4 +1,5 @@
 # node-jsonapi-serializer
+![workflow](https://github.com/GoIntegro/node-jsonapi-serializer/actions/workflows/main.yml/badge.svg)
 
 ## Description
 
