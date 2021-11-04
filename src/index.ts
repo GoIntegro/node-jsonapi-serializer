@@ -355,6 +355,11 @@ export class JSONAPISerializer {
     const entityId = get(data, "id");
     const entityType = get(data, "type") || config.type;
 
+    // detect optional whitelist processing
+    // if compound is true and includeWhitelistKeys is not defined should compound everything
+    const shouldProcessIncludedOrCompound =
+      includeWhitelistKeys || (!includeWhitelistKeys && compound);
+
     if (entityId) {
       if (this.isEntitySerialized(serializedEntities, entityId, entityType)) {
         return this.getSerializedEntity(
@@ -413,7 +418,7 @@ export class JSONAPISerializer {
     forIn(relationships, (value, dashCaseKey) => {
       const key = camelCase(dashCaseKey);
 
-      if (!includeWhitelistKeys) {
+      if (!shouldProcessIncludedOrCompound) {
         return;
       }
 
