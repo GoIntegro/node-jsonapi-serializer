@@ -66,8 +66,6 @@ test("JSONAPISerializer:compound_nested", async () => {
     compound: true,
   });
 
-  console.log(JSON.stringify(output));
-
   expect(
     output.data.relationships.poll.data.relationships.options.data[0].attributes
       .title
