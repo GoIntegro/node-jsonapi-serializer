@@ -550,6 +550,8 @@ export class JSONAPISerializer {
 
           if (value?.id) {
             output.id = value.id.toString();
+          } else if (isString(value) || isNumber(value)) { 
+            output.id = value.toString();
           }
           serializedRelationships[kebabCase(property)] =
             isNull(value) || isUndefined(value) ? null : output;
