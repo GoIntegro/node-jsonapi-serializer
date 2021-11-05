@@ -8,7 +8,9 @@ import {
   get,
   isEmpty,
   isNull,
+  isNumber,
   isObject,
+  isString,
   isUndefined,
   kebabCase,
   keys,
@@ -344,7 +346,7 @@ export class JSONAPISerializer {
   }
 
   private serializeEntity(
-    data: JSONApiResource,
+    data: any,
     config: SerializerConfig,
     includedEntities: JSONApiResource[],
     serializedEntities: JSONApiResource[],
@@ -532,6 +534,8 @@ export class JSONAPISerializer {
 
             if (v?.id) {
               output.id = v.id.toString();
+            } else if (isString(v) || isNumber(v)) {
+              output.id = v.toString();
             }
             return output;
           });

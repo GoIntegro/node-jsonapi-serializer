@@ -1,6 +1,16 @@
 import { JSONAPIDeserializer, JSONAPISerializer } from "../src";
 
-test("JSONAPISerializer: compound nested", async () => {
+test("JSONAPISerializer:compound_nested", async () => {
+
+  class UserSerializer extends JSONAPISerializer {
+    public serializerConfig = () => {
+      return {
+        type: "users",
+        attributes: [],
+      };
+    };
+  }
+
   class PostSerializer extends JSONAPISerializer {
     public serializerConfig = () => {
       return {
@@ -8,6 +18,7 @@ test("JSONAPISerializer: compound nested", async () => {
         attributes: ["content"],
         relationships: {
           poll: { config: new PollSerializer().serializerConfig },
+          mentions: {config: new UserSerializer().serializerConfig}
         },
       };
     };
@@ -35,6 +46,7 @@ test("JSONAPISerializer: compound nested", async () => {
 
   const postData = {
     content: "Test",
+    mentions: ["1234"],
     poll: {
       ttl: "3",
       options: [
@@ -53,6 +65,8 @@ test("JSONAPISerializer: compound nested", async () => {
     data: postData,
     compound: true,
   });
+
+  console.log(JSON.stringify(output));
 
   expect(
     output.data.relationships.poll.data.relationships.options.data[0].attributes
