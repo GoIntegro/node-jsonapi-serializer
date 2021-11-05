@@ -344,7 +344,7 @@ export class JSONAPISerializer {
   }
 
   private serializeEntity(
-    data: any,
+    data: JSONApiResource,
     config: SerializerConfig,
     includedEntities: JSONApiResource[],
     serializedEntities: JSONApiResource[],
@@ -354,11 +354,6 @@ export class JSONAPISerializer {
   ): JSONApiResource {
     const entityId = get(data, "id");
     const entityType = get(data, "type") || config.type;
-
-    // detect optional whitelist processing
-    // if compound is true and includeWhitelistKeys is not defined should compound everything
-    const shouldProcessIncludedOrCompound =
-      includeWhitelistKeys || (!includeWhitelistKeys && compound);
 
     if (entityId) {
       if (this.isEntitySerialized(serializedEntities, entityId, entityType)) {
@@ -417,10 +412,6 @@ export class JSONAPISerializer {
     // check compound relationships and process to includes
     forIn(relationships, (value, dashCaseKey) => {
       const key = camelCase(dashCaseKey);
-
-      if (!shouldProcessIncludedOrCompound) {
-        return;
-      }
 
       if (includeWhitelistKeys) {
         const isKeyWhitelisted = this.isKeyWhitelistedIncluded(
